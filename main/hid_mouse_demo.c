@@ -204,8 +204,7 @@ int btstack_main(int argc, const char * argv[]){
         .pin_bit_mask = INPUT_ASSIGN,
         .pull_up_en = 1
     };
-    gpio_config(&in_conf);
-    gpio_config_t out_conf = {//readピンの設定
+    gpio_config_t out_conf = {//outピンの設定
         .intr_type = GPIO_INTR_DISABLE,
         .mode = GPIO_MODE_OUTPUT,
         .pin_bit_mask = OUTPUT_ASSIGN,
