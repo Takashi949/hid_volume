@@ -184,8 +184,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * pack
 void IRAM_ATTR onTime(void *arg){
     timer_group_clr_intr_status_in_isr(TIMER_G, TIMER_T);
     ets_printf("zzz...\n");
-    esp_sleep_enable_ext0_wakeup(rtc_io_number_get(pinA), 0);//sleep復帰の指定 pinAがLOWで復帰
-    rtc_gpio_pullup_en(rtc_io_number_get(pinA));
+    esp_sleep_enable_ext0_wakeup(pinA, (gpio_get_level(pinA)? 0:1));//sleep復帰の指定 pinAがLOWで復帰
     esp_deep_sleep_start();
 }
 
@@ -214,8 +213,6 @@ int btstack_main(int argc, const char * argv[]){
     gpio_config(&in_conf);
     gpio_config(&out_conf);
     gpio_install_isr_service(0);
-
-    rtc_gpio_deinit(rtc_io_number_get(pinA));//dsから復帰した時用のピンリセット
 
     timer_config_t timer_conf ={
         .alarm_en = TIMER_ALARM_EN,
