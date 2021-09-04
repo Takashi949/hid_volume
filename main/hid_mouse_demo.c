@@ -37,16 +37,6 @@
 
 #define BTSTACK_FILE__ "hid_mouse_demo.c"
 
-// *****************************************************************************
-/* EXAMPLE_START(hid_mouse_demo): HID Mouse Classic
- *
- * @text This HID Device example demonstrates how to implement
- * an HID keyboard. Without a HAVE_BTSTACK_STDIN, a fixed demo text is sent
- * If HAVE_BTSTACK_STDIN is defined, you can type from the terminal
- */
-// *****************************************************************************
-
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -286,5 +276,3 @@ int btstack_main(int argc, const char * argv[]){
     }
     return 0;
 }
-/* LISTING_END */
-/* EXAMPLE_END */
