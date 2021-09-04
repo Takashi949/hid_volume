@@ -141,10 +141,11 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * pack
                             
                             bd_addr_t pc_addr;
                             hid_subevent_connection_opened_get_bd_addr(packet, pc_addr);//接続したpcのあどれすを取得
-                            char *pc_addr_str = bd_addr_to_str(pc_addr);
-                            if(nvs_set_str(my_nvs_handle, "pc_addr", pc_addr_str) == ESP_OK){
+                            nvs_open_from_partition("storage", "pc_addr_NS", NVS_READWRITE, &my_nvs_handle);
+                            if(nvs_set_blob(my_nvs_handle, "pc_addr", pc_addr, sizeof(pc_addr)) == ESP_OK){
                                 nvs_commit(my_nvs_handle);
                             }
+                            nvs_close(my_nvs_handle);
                             set_gpio_intterupt();//REの割り込みを設定
                             timer_start(TIMER_G, TIMER_T);
                             break;
@@ -264,15 +265,11 @@ int btstack_main(int argc, const char * argv[]){
 
     nvs_flash_init_partition("storage");
     nvs_open_from_partition("storage", "pc_addr_NS", NVS_READWRITE, &my_nvs_handle);
-
     size_t read_size;
-    if((nvs_get_str(my_nvs_handle, "pc_addr",NULL, &read_size)) == ESP_OK){
-        bd_addr_t pc_addr;
-        char *pc_addr_str = malloc(read_size);
-        nvs_get_str(my_nvs_handle, "pc_addr", pc_addr_str, &read_size);
-        printf("%s\n", pc_addr_str);
-        sscanf_bd_addr(pc_addr_str, pc_addr);
+    bd_addr_t pc_addr;
+    if((nvs_get_blob(my_nvs_handle, "pc_addr", pc_addr, &read_size)) == ESP_OK){
         hid_device_connect(pc_addr, &hid_cid);
     }
+    nvs_close(my_nvs_handle);
     return 0;
 }
