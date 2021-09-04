@@ -107,11 +107,11 @@ const uint8_t hid_descriptor_volume[] = {
  0xC0                    // END_COLLECTION
 };
 
-unsigned char last = 0;   //REの前回値 0 0 0 0 A B 0 0 
+uint8_t last = 0;   //REの前回値 0 0 0 0 A B 0 0 
 const uint8_t rot_table[]={ 0,1, 2, 0, 2, 0, 0, 1, 1, 0, 0, 2, 0, 2, 1,0};   //RE回転状態からディスクリプタの変換テーブル 1で増音　２で小音 0で変化なし
 
 static void volume_send_now(void){
-    unsigned char  p = (gpio_get_level(pinA)) | (gpio_get_level(pinB) << 1);   //REの今の値 0 0 0 0 0 0 A B
+    uint8_t p = (gpio_get_level(pinA)) | (gpio_get_level(pinB) << 1);   //REの今の値 0 0 0 0 0 0 A B
     uint8_t report[] = {0xa1, rot_table[last | p]}; //RE前回値と今回値の和を添字に送信内容をテーブルから持ってくる
     //printf("%d\n", rot_table[last | p] );
     last = p << 2;   //今回値で更新
@@ -183,26 +183,18 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * pack
 
 void IRAM_ATTR onTime(void *arg){
     timer_group_clr_intr_status_in_isr(TIMER_G, TIMER_T);
-    ets_printf("zzz...\n");
-    esp_sleep_enable_ext0_wakeup(pinA, (gpio_get_level(pinA)? 0:1));//sleep復帰の指定 pinAがLOWで復帰
+    ets_printf("zzz...\n%d, %d\n", gpio_get_level(pinA), !gpio_get_level(pinA));
+    esp_sleep_enable_ext0_wakeup(pinA, !gpio_get_level(pinA)); //sleep復帰の指定 pinAがLOWで復帰
     esp_deep_sleep_start();
 }
-
-/* @section Main Application Setup
- *
- * @text Listing MainConfiguration shows main application code.
- * To run a HID Device service you need to initialize the SDP, and to create and register HID Device record with it.
- * At the end the Bluetooth stack is started.
- */
-
-/* LISTING_START(MainConfiguration): Setup HID Device */
 
 int btstack_main(int argc, const char * argv[]){
     gpio_config_t in_conf = {//readピンの設定
         .intr_type = GPIO_INTR_DISABLE,
         .mode = GPIO_MODE_INPUT,
         .pin_bit_mask = INPUT_ASSIGN,
-        .pull_up_en = 1
+        .pull_up_en = true,
+        .pull_down_en = false
     };
     gpio_config_t out_conf = {//outピンの設定
         .intr_type = GPIO_INTR_DISABLE,
